@@ -1,0 +1,186 @@
+{
+  "measuredAt": "2026-09-05T05:21:47.889Z",
+  "environment": "Headless Chromium 1234 on local dev server; local 1024px RGBA fixture; actual composeSurface, one face; fresh ImageCache per scenario; no network during measured work",
+  "method": "PerformanceObserver longtask plus 16ms setInterval heartbeat. Texture init, source decode, per-layer transformation/mask compositing and CanvasTexture creation included; GPU upload/render excluded. One sample each, not a device-independent guarantee.",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+  "hardwareConcurrency": 17,
+  "results": [
+    {
+      "quality": "standard",
+      "layers": 4,
+      "textureSide": 1024,
+      "firstCompositionMs": 102,
+      "longTasks": [
+        {
+          "startTime": 4636,
+          "duration": 150
+        },
+        {
+          "startTime": 4868,
+          "duration": 71
+        }
+      ],
+      "longestTaskMs": 150,
+      "heartbeatIntervalMs": 16,
+      "maxHeartbeatGapMs": 102,
+      "heartbeatGapsAbove100ms": [
+        102
+      ]
+    },
+    {
+      "quality": "high",
+      "layers": 12,
+      "textureSide": 2048,
+      "firstCompositionMs": 592,
+      "longTasks": [
+        {
+          "startTime": 5248,
+          "duration": 53
+        },
+        {
+          "startTime": 5302,
+          "duration": 538
+        }
+      ],
+      "longestTaskMs": 538,
+      "heartbeatIntervalMs": 16,
+      "maxHeartbeatGapMs": 592,
+      "heartbeatGapsAbove100ms": [
+        592
+      ]
+    }
+  ],
+  "after": {
+    "measuredAt": "2026-09-05T05:33:43.638Z",
+    "method": "Same fixture with setTimeout(0) time slicing. Only task/timer/rAF gaps overlapping the measured window are reported. Actual Playwright click opens the application help dialog during a separate 12-layer build.",
+    "results": [
+      {
+        "quality": "standard",
+        "layers": 4,
+        "firstCompositionMs": 134,
+        "longTasks": [],
+        "longestTaskMs": 0,
+        "maxHeartbeatGapMs": 25,
+        "maxAnimationFrameGapMs": 150,
+        "heartbeatGapsAbove100ms": []
+      },
+      {
+        "quality": "high",
+        "layers": 12,
+        "firstCompositionMs": 964,
+        "longTasks": [],
+        "longestTaskMs": 0,
+        "maxHeartbeatGapMs": 37,
+        "maxAnimationFrameGapMs": 17,
+        "heartbeatGapsAbove100ms": []
+      }
+    ],
+    "cancellation": {
+      "requestedDelayMs": 35,
+      "actualTimerMs": 43,
+      "completedMs": 43,
+      "errorName": "AbortError"
+    },
+    "realInput": {
+      "handledAt": 5866,
+      "duringComposition": true,
+      "rafCallbackAt": 5866.399999976158,
+      "compositionEnd": 6594.600000023842,
+      "clickAndDialogVisibleMs": 97,
+      "requestAnimationFrameCallbackDelayMs": 0,
+      "build": {
+        "quality": "high",
+        "layers": 12,
+        "firstCompositionMs": 927,
+        "longTasks": [],
+        "longestTaskMs": 0,
+        "maxHeartbeatGapMs": 34,
+        "maxAnimationFrameGapMs": 150,
+        "heartbeatGapsAbove100ms": []
+      }
+    }
+  },
+  "schedulerYieldAttempt": {
+    "measuredAt": "2026-09-05T05:26:20.533Z",
+    "method": "Same fixture after bounded time slicing; Long Tasks filtered to overlap measured composition window. A cancelled 12-layer high-quality build is tested separately.",
+    "results": [
+      {
+        "quality": "standard",
+        "layers": 4,
+        "firstCompositionMs": 113,
+        "longTasks": [],
+        "longestTaskMs": 0,
+        "maxHeartbeatGapMs": 113,
+        "heartbeatGapsAbove100ms": [
+          113
+        ]
+      },
+      {
+        "quality": "high",
+        "layers": 12,
+        "firstCompositionMs": 672,
+        "longTasks": [],
+        "longestTaskMs": 0,
+        "maxHeartbeatGapMs": 599,
+        "heartbeatGapsAbove100ms": [
+          599
+        ]
+      }
+    ],
+    "cancellation": {
+      "requestedDelayMs": 35,
+      "actualTimerMs": 51,
+      "completedMs": 62,
+      "errorName": "AbortError"
+    }
+  },
+  "beforeModalBlurRemoval": {
+    "handledAt": 6213,
+    "duringComposition": true,
+    "paintedAt": 6213.5,
+    "compositionEnd": 6962.699999928474,
+    "clickAndDialogVisibleMs": 87,
+    "paintDelayMs": 1,
+    "build": {
+      "quality": "high",
+      "layers": 12,
+      "firstCompositionMs": 938,
+      "longTasks": [],
+      "longestTaskMs": 0,
+      "maxHeartbeatGapMs": 41,
+      "maxAnimationFrameGapMs": 483,
+      "heartbeatGapsAbove100ms": []
+    }
+  },
+  "fixture": {
+    "product": "paper",
+    "widthMm": 100,
+    "heightMm": 100,
+    "lamination": "matte",
+    "sourceSizePx": [
+      1024,
+      1024
+    ],
+    "source": "local PNG with white/black halves and a transparent left margin; one image reused across layers",
+    "layerKindsCycled": [
+      "print",
+      "foil",
+      "varnish",
+      "matte",
+      "emboss",
+      "deboss",
+      "white"
+    ],
+    "maskMode": "luminance",
+    "offsetXPercent": "(index % 3) * 5",
+    "rotationDegrees": "(index % 4) * 15"
+  },
+  "limits": [
+    "These are single samples from a headless browser using software ANGLE; timing and frame cadence vary by device and concurrent host load.",
+    "Direct material probes exclude GPU texture upload and 3D draw time. The real-input probe also includes an actual application dialog interaction.",
+    "requestAnimationFrameCallbackDelayMs measures a callback opportunity, not completion of GPU rasterization or presentation.",
+    "The initial baseline observer collected tasks around setup as well as composition; after-change task/gap lists are filtered to the measured composition window.",
+    "The native scheduler.yield attempt did not satisfy timer responsiveness and was replaced. Timer yielding deliberately increases total completion time while allowing interaction between pixel batches.",
+    "Frame gaps up to 150 ms were still observed in the final run; these measurements do not establish a guaranteed animation frame rate."
+  ]
+}

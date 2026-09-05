@@ -1,0 +1,74 @@
+{
+  "diagnostics": {
+    "badge": {
+      "ready": "true",
+      "frames": "2",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "5",
+      "geometries": "8"
+    },
+    "badgeBack": {
+      "ready": "true",
+      "frames": "3",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "5",
+      "geometries": "8"
+    },
+    "paper": {
+      "ready": "true",
+      "frames": "6",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "8",
+      "geometries": "4"
+    },
+    "kraft": {
+      "ready": "true",
+      "frames": "8",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "8",
+      "geometries": "4"
+    },
+    "foil": {
+      "ready": "true",
+      "frames": "10",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "8",
+      "geometries": "4"
+    },
+    "acrylic": {
+      "ready": "true",
+      "frames": "13",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "9",
+      "geometries": "4"
+    },
+    "acrylicWhite": {
+      "ready": "true",
+      "frames": "15",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "9",
+      "geometries": "4"
+    },
+    "idle": {
+      "before": 15,
+      "after": 15,
+      "stopped": true
+    },
+    "afterTenProductSwitches": {
+      "ready": "true",
+      "frames": "35",
+      "engine": "three.js r180",
+      "updating": "false",
+      "textures": "9",
+      "geometries": "4"
+    }
+  },
+  "errors": []
+}

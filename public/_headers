@@ -1,0 +1,22 @@
+# Revalidate entry points so new releases can be discovered.
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/projects
+  Cache-Control: no-cache
+
+/studio/*
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+# Vite assets have content hashes; each changed file gets a new URL.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

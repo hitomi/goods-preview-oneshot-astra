@@ -1,0 +1,15 @@
+{
+  "contextLossMessage": "暂时无法显示三维画面\n\n显卡预览已暂停，正在等待浏览器恢复。当前项目与原图不会被清除，可继续编辑或备份。\n\n你的项目仍然保留，可继续编辑设置或下载项目备份。",
+  "restored": true,
+  "automaticRotation": true,
+  "download": "局部光油验证-效果图.png",
+  "diagnostics": {
+    "ready": "true",
+    "frames": "21",
+    "engine": "three.js r180",
+    "updating": "false",
+    "textures": "8",
+    "geometries": "4"
+  },
+  "errors": []
+}
