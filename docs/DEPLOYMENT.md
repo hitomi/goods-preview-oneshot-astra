@@ -1,6 +1,6 @@
 # Cloudflare Pages 部署
 
-当前已配置静态构建、Wrangler 命令及缓存响应头，尚未创建或发布 Cloudflare Pages 站点。实际本地验证记录见 [PROGRESS](PROGRESS.md)；以下远程操作由准备发布时执行。
+当前已配置静态构建、Wrangler 命令及缓存响应头，本地验收通过；用户提供的首次云端日志显示构建成功，但使用 Workers 命令发布失败，尚无 Pages 发布成功记录。验证记录见 [PROGRESS](PROGRESS.md)。
 
 Pages 只托管 `dist` 中的应用文件。用户图片、工程与 IndexedDB 数据留在设备内，无需 Pages Functions、数据库或运行时密钥，也不启用 Web Analytics。
 
@@ -21,6 +21,24 @@ Pages 会安装依赖并执行构建；保存部署后，后续推送会触发�
 使用当前 Pages 构建环境，保留仓库根目录的 `.node-version`，与本地保持相同的 Node 24 版本；不要设置冲突的 `NODE_VERSION`。Pages 支持读取该文件，不能仅依靠 `package.json` 的 `engines` 选择 Node 版本。[构建环境说明](https://developers.cloudflare.com/pages/configuration/build-image/)
 
 构建命令填写 `npm run build` 即可；`pages:deploy` 用于从本机上传，不应作为 Pages 云端构建命令。
+
+## 构建成功，但提示缺少 Worker 入口
+
+若日志依次出现 `Success: Build command completed`、`Executing user deploy command: npx wrangler deploy` 和 `Missing entry-point to Worker script or to assets directory`，说明发布阶段调用了 Workers 命令，与本仓库的 Pages 配置不匹配。`npx wrangler deploy` 是 Workers Builds 的默认发布命令；这类日志通常表示创建时进入了 Workers 的 Git 部署流程。[Workers Builds 配置](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)
+
+继续使用本项目约定的 Pages 部署方式：
+
+1. 回到 **Workers & Pages**，创建应用时明确进入 **Pages**，连接同一个 GitHub 仓库。
+2. 生产分支填 `main`，构建命令填 `npm run build`，输出目录填 `dist`，根目录保持默认。
+3. 保存并部署。Pages Git 集成会在构建后上传输出目录，无需填写独立的 `npx wrangler deploy` 发布命令。如果页面要求填写该命令，请返回检查是否仍在 Workers 创建流程。[Pages Git 集成指南](https://developers.cloudflare.com/pages/get-started/git-integration/)
+
+不要为消除这条错误向 Pages 配置补上 Worker `main` 或 `assets` 字段，也不要把 Workers Builds 的命令替换当成已创建 Pages 项目。命令行方式需要先有 Pages 项目与相应授权，完整步骤见下方“Wrangler 手动发布”。日志里的依赖弃用、安装脚本与包体积提示没有导致本次失败，构建产物已成功生成。
+
+## Pages API 认证错误 10000
+
+如果已换成 `wrangler pages deploy` 却返回 `Authentication error [code: 10000]`，先检查部署进程使用的 `CLOUDFLARE_API_TOKEN`：令牌需具备目标账户的 **Account → Cloudflare Pages → Edit** 权限，账户资源范围与 `CLOUDFLARE_ACCOUNT_ID` 对应。账户本人是管理员不代表该令牌具有同等权限；Workers Builds 自动生成的令牌也不能假定拥有 Pages 权限。还需确认目标 Pages 项目确实已创建。更换命令不会把 Worker 项目转换为 Pages 项目。[Pages API 权限](https://developers.cloudflare.com/pages/configuration/api/)
+
+采用上方推荐的 Pages Git 集成流程可直接由 Pages 完成发布；使用自定义 CI 时，按“Wrangler 手动发布”配置项目和部署凭据。
 
 ## Wrangler 本地预览
 

@@ -37,6 +37,10 @@ Git归档前重新执行类型检查、21项单测、完整15项Vite生产端到
 
 ## 交付
 
+用户首次云端日志（2026-09-05 05:53–05:54 UTC）：Node24.19.0依赖安装、TypeScript、Vite与PWA构建均成功；发布阶段执行 `npx wrangler deploy`，因Pages配置缺少Worker入口而失败。已核对官方文档：该命令是Workers Builds默认发布命令，日志指向选用了Workers部署入口；应通过Pages入口连接仓库并设置 `main` / `npm run build` / `dist`。部署指南已补充具体纠正步骤。尚未获得后续Pages云端发布成功证据。
+
+第二次日志（05:55–05:56 UTC）：构建再次成功，命令改为 `npx wrangler pages deploy`，访问Pages项目API时返回认证错误10000。日志明确使用环境变量中的API令牌；尚未验证令牌的Pages权限与账户范围，也不能据此确认Pages项目已存在。部署指南补充权限与项目类型检查，代码构建无需修改；未记录或提交用户账户标识与凭据。
+
 - `npm run preview -- --port 4173`；本次交付本地预览为 `http://localhost:4173/`。
 - 文档定义的v1目标已完成，后续功能按PLAN中的扩展范围独立推进。
 - Git归档目标：`https://github.com/hitomi/goods-preview-oneshot-astra.git`，分支 `main`，提交作者 `codex <codex@openai.com>`。
