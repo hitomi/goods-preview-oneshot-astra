@@ -71,6 +71,11 @@ export function Studio({ id }: { id: string }) {
     "none" | "product" | "properties"
   >("none");
   const [importFiles, setImportFiles] = useState<File[] | null>(null);
+  const [importCutline, setImportCutline] = useState(false);
+  const openImport = (files: File[] = [], cutline = false) => {
+    setImportCutline(cutline);
+    setImportFiles(files);
+  };
   const [addLayer, setAddLayer] = useState(false);
   const [help, setHelp] = useState(false);
   const [projectMenu, setProjectMenu] = useState(false);
@@ -305,17 +310,14 @@ export function Studio({ id }: { id: string }) {
           <ProductPanel
             project={project}
             update={update}
-            onImport={() => setImportFiles([])}
+            onImport={() => openImport([], true)}
           />
           <section className="layers-section">
             <div className="section-title">
               <h2>图案与工艺</h2>
               <span className="step-number">02</span>
             </div>
-            <button
-              className="import-button"
-              onClick={() => setImportFiles([])}
-            >
+            <button className="import-button" onClick={() => openImport()}>
               <Upload size={17} />
               <span>批量导入图片</span>
               <span className="import-shortcut">PNG / SVG +</span>
@@ -425,7 +427,7 @@ export function Studio({ id }: { id: string }) {
             event.preventDefault();
             setDragOver(false);
             if (event.dataTransfer.files.length)
-              setImportFiles(Array.from(event.dataTransfer.files));
+              openImport(Array.from(event.dataTransfer.files));
           }}
           aria-label="三维预览工作区"
         >
@@ -789,7 +791,7 @@ export function Studio({ id }: { id: string }) {
           <PanelLeft size={18} />
           制品与图层
         </button>
-        <button onClick={() => setImportFiles([])}>
+        <button onClick={() => openImport()}>
           <Upload size={18} />
           导入图片
         </button>
@@ -855,6 +857,7 @@ export function Studio({ id }: { id: string }) {
         <ImportDialog
           project={project}
           initialFiles={importFiles}
+          initialUsage={importCutline ? "cutline" : undefined}
           onClose={() => setImportFiles(null)}
           onCommit={editor.commitAssets}
         />

@@ -169,6 +169,16 @@ export function productShape(project: Project): THREE.Shape {
   }
   const r = project.shape === "rounded" ? Math.min(w, h) * 0.08 : 0;
   const shape = new THREE.Shape();
+  if (r === 0) {
+    // Zero-length Bézier corners produce almost-identical floating-point samples.
+    // Earcut can then omit a whole triangle; straight rectangles need four exact corners.
+    shape.moveTo(-w / 2, -h / 2);
+    shape.lineTo(w / 2, -h / 2);
+    shape.lineTo(w / 2, h / 2);
+    shape.lineTo(-w / 2, h / 2);
+    shape.closePath();
+    return shape;
+  }
   shape.moveTo(-w / 2 + r, -h / 2);
   shape.lineTo(w / 2 - r, -h / 2);
   shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);

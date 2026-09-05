@@ -52,6 +52,16 @@ export function HelpDialog({
           </div>
         </section>
         <section>
+          <Layers size={21} />
+          <div>
+            <h3>从线稿识别制品外形</h3>
+            <p>
+              纸品与亚克力支持导入刀线图片或
+              SVG。普通图片请只保留一条闭合红线或黑线；检查叠加轮廓后再导入。识别沿线条内缘，线宽会带来误差，制品宽高决定最终尺寸。有断口、孔洞或多条轮廓时需先修正线稿。
+            </p>
+          </div>
+        </section>
+        <section>
           <Download size={21} />
           <div>
             <h3>文件留在自己的设备里</h3>

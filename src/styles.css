@@ -1636,6 +1636,93 @@ button svg {
 .import-mode {
   font-size: 12px;
 }
+.cutline-trace {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f7f9f4;
+  align-items: start;
+}
+.cutline-trace-preview {
+  position: relative;
+  height: 220px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.cutline-trace-preview img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cutline-trace-preview img:first-child {
+  opacity: 0.5;
+}
+.cutline-trace-controls {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.cutline-trace-controls p {
+  margin: 8px 0;
+}
+.cutline-trace-controls .select-field {
+  max-width: 240px;
+}
+.cutline-trace-controls .text-button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.cutline-trace-warning,
+.cutline-trace-error {
+  color: #876021;
+}
+.cutline-zoom-label {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 13px;
+  margin: 16px 0;
+}
+.cutline-zoom-label input {
+  max-width: 240px;
+}
+.cutline-detail-viewport {
+  max-height: 58vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.cutline-detail-image {
+  position: relative;
+}
+.cutline-detail-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cutline-detail-image img:first-child {
+  opacity: 0.5;
+}
+@media (max-width: 600px) {
+  .cutline-trace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .cutline-trace-preview {
+    height: 180px;
+  }
+}
 .error-box {
   padding: 14px 17px;
   background: #fff4e3;

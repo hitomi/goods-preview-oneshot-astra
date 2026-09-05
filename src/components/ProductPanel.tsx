@@ -1,4 +1,11 @@
-import { Circle, File, Layers2, Upload, ChevronDown } from "lucide-react";
+import {
+  Circle,
+  File,
+  Layers2,
+  Upload,
+  ChevronDown,
+  Download,
+} from "lucide-react";
 import type {
   Project,
   ProductType,
@@ -6,7 +13,7 @@ import type {
   ShapeType,
 } from "../domain/model";
 import { PRODUCTS, SUBSTRATES } from "../domain/catalog";
-import { NumberField } from "./ui";
+import { NumberField, downloadBlob } from "./ui";
 
 const icons = { badge: Circle, paper: File, acrylic: Layers2 };
 
@@ -134,8 +141,22 @@ export function ProductPanel({
       {project.product !== "badge" && (
         <button className="text-button cutline-link" onClick={onImport}>
           <Upload size={13} />
-          {project.cutline ? "替换 SVG 刀线" : "导入 SVG 刀线"}
+          {project.cutline ? "替换刀线" : "导入刀线图片 / SVG"}
           <ChevronDown size={12} />
+        </button>
+      )}
+      {project.product !== "badge" && project.cutline && (
+        <button
+          className="text-button cutline-link"
+          onClick={() =>
+            downloadBlob(
+              new Blob([project.cutline!], { type: "image/svg+xml" }),
+              `${project.name}-刀线.svg`,
+            )
+          }
+        >
+          <Download size={13} />
+          下载当前刀线 SVG
         </button>
       )}
       <div className="section-title material-title">

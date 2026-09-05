@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-05",
+  "environment": "Chromium with SwiftShader, 1440 × 1000 desktop viewport",
+  "rectangle": {
+    "reproduction": "70 × 210 mm paper, rectangle, 0.4 mm thickness, perspective view",
+    "cause": "Zero-radius quadratic corner curves generate nearly coincident floating-point samples. Earcut omitted half the front face.",
+    "triangleAreaBeforeMm2": 7350,
+    "expectedAreaMm2": 14700,
+    "fix": "Use exactly four straight edges for a rectangle.",
+    "unitCoverage": "Both front and back cover all area with two nondegenerate triangles at 70×210, 100×148, 5×5, 5×500 and 500×5 mm.",
+    "browserCoverage": "70×210×0.4 and 5×15×0.05 mm, separate front/back color patterns, >98% colored interior, correct reading orientation and saved dimensions after reload."
+  },
+  "badge": {
+    "reproduction": "200 mm badge, warm scene, back view, 35 px horizontal / 12 px vertical orbit drag",
+    "cause": "The fixed 0.1–10000 camera frustum quantized a 0.024 mm disc/cap separation to less than one 24-bit depth-buffer step at the fitted distance.",
+    "fix": "Project the eight model-bounds corners into camera depth and fit near/far on rendering and PNG export, including after zoom and pan. Leave room for the outline guide and rear shadow plane.",
+    "sample": "Central flat patch above the pin; fraction of horizontal neighboring pixels with RGB absolute difference sum >6.",
+    "roughPixelFractionBefore": 0.32094165467016683,
+    "roughPixelFractionAfter": 0,
+    "browserAssertion": "Fraction <0.01 after orbit and three zoom-out/zoom-in steps, plus 200 and 500 mm maximum-zoom closeups.",
+    "unitCoverage": "5, 58, 200 and 500 mm envelopes through front/back/perspective, near/far zoom and panned target; former sub-pixel depth gap exceeds 100 depth steps, including maximum zoom for 58–500 mm models.",
+    "closeupReview": "A first spherical-bounds solution still collapsed near toward zero at maximum zoom. Verified the residual stripes at 500 mm and replaced the sphere with projected box depths; no zoom limits were tightened."
+  },
+  "regressionCoverage": "Existing acrylic reverse ink, white underbase, independent back layer and zero-opacity back layer checks passed.",
+  "limitation": "Software WebGL browser verification; real device GPUs and manufacturer optical matching are not covered."
+}

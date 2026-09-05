@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FileImage,
   LoaderCircle,
@@ -18,6 +18,8 @@ import { createLayer, isLayerSupported, LAYER_LABELS } from "../domain/catalog";
 import { processImage, safeSvg, suggestLayer } from "../lib/images";
 import { useAssetUrls } from "../lib/useProject";
 import { IconButton, Modal } from "./ui";
+import { CutlineTrace } from "./CutlineTrace";
+import type { TraceCutlineResult } from "../lib/traceCutline";
 
 type Usage = "library" | "cutline" | `${LayerKind}-${Side}`;
 interface ImportRow {
@@ -25,16 +27,19 @@ interface ImportRow {
   usage: Usage;
   mode: MaskMode;
   invert: boolean;
+  trace?: TraceCutlineResult;
 }
 
 export function ImportDialog({
   project,
   initialFiles,
+  initialUsage,
   onClose,
   onCommit,
 }: {
   project: Project;
   initialFiles?: File[];
+  initialUsage?: "cutline";
   onClose: () => void;
   onCommit: (
     assets: AssetRecord[],
@@ -68,9 +73,15 @@ export function ImportDialog({
         const side = guess?.side ?? "front";
         good.push({
           asset,
-          usage: isLayerSupported(project.product, kind, side)
-            ? `${kind}-${side}`
-            : "library",
+          usage:
+            initialUsage === "cutline" &&
+            project.product !== "badge" &&
+            !rows.length &&
+            !good.length
+              ? "cutline"
+              : isLayerSupported(project.product, kind, side)
+                ? `${kind}-${side}`
+                : "library",
           mode: asset.hasAlpha ? "alpha" : "luminance",
           invert: false,
         });
@@ -97,6 +108,18 @@ export function ImportDialog({
       current.map((row, i) => (i === index ? { ...row, ...changes } : row)),
     );
 
+  const recordTrace = useCallback((id: string, trace?: TraceCutlineResult) => {
+    setRows((current) =>
+      current.map((row) => (row.asset.id === id ? { ...row, trace } : row)),
+    );
+  }, []);
+  const waitingForTrace = rows.some(
+    (row) =>
+      row.usage === "cutline" &&
+      row.asset.mime !== "image/svg+xml" &&
+      !row.trace,
+  );
+
   async function apply() {
     setSaving(true);
     try {
@@ -109,11 +132,18 @@ export function ImportDialog({
         );
       const cutlines = rows.filter((row) => row.usage === "cutline");
       if (cutlines.length > 1)
-        throw new Error("一件制品只能使用一条外轮廓，请仅选择一张刀线 SVG。");
+        throw new Error("一件制品只能使用一条外轮廓，请仅选择一张刀线图片。");
       let cutline: string | undefined;
       if (cutlines.length) {
-        cutline = safeSvg(await cutlines[0].asset.original.text());
-        const { validateCutline } = await import("../render/Preview");
+        const row = cutlines[0];
+        if (row.asset.mime !== "image/svg+xml" && !row.trace)
+          throw new Error("请先完成刀线识别，检查闭合轮廓后再导入。");
+        cutline = safeSvg(
+          row.asset.mime === "image/svg+xml"
+            ? await row.asset.original.text()
+            : row.trace!.svg,
+        );
+        const { validateCutline } = await import("../render/geometry");
         validateCutline(cutline);
       }
       await onCommit(
@@ -153,14 +183,18 @@ export function ImportDialog({
 
   return (
     <Modal
-      title="一次导入，逐张安排"
-      eyebrow="图案与工艺"
+      title={
+        initialUsage === "cutline" ? "把轮廓变成制品外形" : "一次导入，逐张安排"
+      }
+      eyebrow={initialUsage === "cutline" ? "导入刀线" : "图案与工艺"}
       wide
       onClose={onClose}
       busy={processing || saving}
     >
       <p className="modal-intro">
-        选择每张图片用在哪里。同一素材之后也可以复用到其他图层，原图会完整保存在本机。
+        {initialUsage === "cutline"
+          ? "选择只有红线或黑线轮廓的图片，检查识别结果后导入。也支持单条闭合 SVG；原图会完整保留。"
+          : "选择每张图片用在哪里。刀线图片也可以一起导入；同一素材之后可复用，原图会完整保存在本机。"}
       </p>
       <input
         ref={fileRef}
@@ -246,7 +280,10 @@ export function ImportDialog({
                   value={row.usage}
                   disabled={saving}
                   onChange={(e) =>
-                    updateRow(index, { usage: e.target.value as Usage })
+                    updateRow(index, {
+                      usage: e.target.value as Usage,
+                      trace: undefined,
+                    })
                   }
                 >
                   <option value="library">仅加入素材库</option>
@@ -265,10 +302,18 @@ export function ImportDialog({
                         </option>
                       )),
                   )}
-                  {project.product !== "badge" &&
-                    row.asset.mime === "image/svg+xml" && (
-                      <option value="cutline">制品刀线 · SVG</option>
-                    )}
+                  {project.product !== "badge" && (
+                    <option
+                      value="cutline"
+                      disabled={rows.some(
+                        (other) => other !== row && other.usage === "cutline",
+                      )}
+                    >
+                      {row.asset.mime === "image/svg+xml"
+                        ? "制品刀线 · SVG"
+                        : "制品刀线 · 图片识别"}
+                    </option>
+                  )}
                 </select>
                 {isMask ? (
                   <div className="mask-choice">
@@ -316,6 +361,17 @@ export function ImportDialog({
                 >
                   <X size={16} />
                 </IconButton>
+                {row.usage === "cutline" &&
+                  row.asset.mime !== "image/svg+xml" && (
+                    <CutlineTrace
+                      asset={row.asset}
+                      imageUrl={urls[row.asset.id]}
+                      width={project.width}
+                      height={project.height}
+                      disabled={saving}
+                      onResult={recordTrace}
+                    />
+                  )}
               </div>
             );
           })}
@@ -358,7 +414,7 @@ export function ImportDialog({
           </button>
           <button
             className="button primary"
-            disabled={!rows.length || processing || saving}
+            disabled={!rows.length || processing || saving || waitingForTrace}
             onClick={() => void apply()}
           >
             {saving ? (

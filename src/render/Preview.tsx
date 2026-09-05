@@ -11,6 +11,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { Project, Side } from "../domain/model";
 import { isLayerSupported } from "../domain/catalog";
 import { badgeBack, productShape, surfaceGeometry } from "./geometry";
+import { fitCameraClipping } from "./camera";
 import {
   composeSurface,
   disposeMaps,
@@ -183,6 +184,7 @@ class PreviewRuntime implements PreviewHandle {
   private environment: THREE.WebGLRenderTarget;
   private shadow: THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial>;
   private model?: THREE.Group;
+  private modelBounds = new THREE.Box3();
   private guides?: THREE.Group;
   private images = new ImageCache();
   private observer: ResizeObserver;
@@ -400,6 +402,7 @@ class PreviewRuntime implements PreviewHandle {
       }
       this.model = next;
       this.scene.add(next);
+      this.modelBounds.setFromObject(next);
       const previousSize = this.size;
       this.size = Math.max(project.width, project.height);
       this.shadow.scale.setScalar(this.size * 8);
@@ -540,6 +543,7 @@ class PreviewRuntime implements PreviewHandle {
       .normalize()
       .multiplyScalar(-this.size * 0.14);
     this.shadow.quaternion.copy(this.camera.quaternion);
+    fitCameraClipping(this.camera, this.modelBounds);
     try {
       this.renderer.render(this.scene, this.camera);
       this.canvas.dataset.frames = String(++this.frames);
@@ -617,6 +621,7 @@ class PreviewRuntime implements PreviewHandle {
       throw (
         this.buildError ?? new Error("预览还未准备好，请等待画面出现后再导出。")
       );
+    fitCameraClipping(this.camera, this.modelBounds);
     this.renderer.render(this.scene, this.camera);
     return new Promise((resolve, reject) =>
       this.canvas.toBlob(

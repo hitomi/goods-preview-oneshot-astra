@@ -4,6 +4,46 @@ import { badgeBack, productShape, surfaceGeometry } from "./geometry";
 import * as THREE from "three";
 
 describe("manufactured model geometry", () => {
+  it.each([
+    [70, 210],
+    [100, 148],
+    [5, 5],
+    [5, 500],
+    [500, 5],
+  ])(
+    "covers the entire %s × %s rectangle on both faces without degenerate triangles",
+    (width, height) => {
+      const project = {
+        ...createProject("paper"),
+        shape: "rectangle" as const,
+        width,
+        height,
+        thickness: 0.05,
+      };
+      for (const back of [false, true]) {
+        const geometry = surfaceGeometry(project, back);
+        const positions = geometry.attributes.position;
+        const indices = geometry.index!;
+        let area = 0;
+        expect(indices.count).toBe(6);
+        for (let i = 0; i < indices.count; i += 3) {
+          const a = indices.getX(i),
+            b = indices.getX(i + 1),
+            c = indices.getX(i + 2);
+          const twiceArea =
+            (positions.getX(b) - positions.getX(a)) *
+              (positions.getY(c) - positions.getY(a)) -
+            (positions.getY(b) - positions.getY(a)) *
+              (positions.getX(c) - positions.getX(a));
+          expect(twiceArea).toBeGreaterThan(0);
+          area += twiceArea / 2;
+        }
+        expect(area).toBeCloseTo(width * height, 5);
+        geometry.dispose();
+      }
+    },
+  );
+
   it("gives a badge a convex face, wrapped edge, metal backing, and a projecting pin", () => {
     const project = createProject("badge");
     const face = surfaceGeometry(project);
