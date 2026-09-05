@@ -52,18 +52,47 @@ describe("manufactured model geometry", () => {
       project.width,
       4,
     );
-    expect(face.boundingBox!.max.z).toBeGreaterThan(project.thickness / 2);
+    // Thickness now includes the shallow dome; the front center is its highest point.
+    expect(face.boundingBox!.max.z).toBeCloseTo(project.thickness / 2, 5);
+    const positions = face.attributes.position;
+    const shoulderHeights = Array.from({ length: positions.count }, (_, i) => i)
+      .filter(
+        (i) =>
+          Math.hypot(positions.getX(i), positions.getY(i)) >
+          project.width * 0.4,
+      )
+      .map((i) => positions.getZ(i));
+    expect(Math.max(...shoulderHeights)).toBeLessThan(face.boundingBox!.max.z);
     expect(face.boundingBox!.min.z).toBeLessThan(0);
     const back = badgeBack(project);
     const bounds = new THREE.Box3().setFromObject(back);
-    expect(bounds.min.z).toBeLessThan(-project.thickness / 2 - 1);
-    // The metal cap must not cut through the printed shoulder and create a false front-facing gray ring.
-    expect(new THREE.Box3().setFromObject(back.children[0]).max.z).toBeLessThan(
-      face.boundingBox!.min.z,
+    const plate = back.getObjectByName("recessed-back-plate")!;
+    expect(bounds.min.z).toBeLessThan(
+      new THREE.Box3().setFromObject(plate).min.z - 0.5,
     );
+    // An inset back sits within the shell's z range, but must stay behind the print face.
+    const frontMesh = new THREE.Mesh(face, new THREE.MeshBasicMaterial());
+    back.updateMatrixWorld(true);
+    for (const fraction of [-0.38, 0, 0.38]) {
+      const x = project.width * fraction;
+      const frontHit = new THREE.Raycaster(
+        new THREE.Vector3(x, 0, 30),
+        new THREE.Vector3(0, 0, -1),
+      ).intersectObject(frontMesh)[0];
+      const backHit = new THREE.Raycaster(
+        new THREE.Vector3(x, 0, -30),
+        new THREE.Vector3(0, 0, 1),
+      ).intersectObject(plate)[0];
+      expect(frontHit).toBeDefined();
+      expect(backHit).toBeDefined();
+      expect(frontHit.point.z - backHit.point.z).toBeGreaterThan(
+        project.thickness * 0.3,
+      );
+    }
     const normals = face.attributes.normal;
     expect(normals.getZ(Math.floor(normals.count / 3))).toBeGreaterThan(0);
     face.dispose();
+    frontMesh.material.dispose();
     back.traverse((child) => {
       if (child instanceof THREE.Mesh) child.geometry.dispose();
     });

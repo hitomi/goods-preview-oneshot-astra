@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
 import type { Project } from "../domain/model";
+import { badgeFrontGeometry, badgeShape } from "./badgeGeometry";
+export { badgeBack } from "./badgeGeometry";
 
 const cutlineCache = new Map<string, THREE.Vector2[]>();
 
@@ -145,18 +147,10 @@ export function validateCutline(svg: string): void {
 
 export function productShape(project: Project): THREE.Shape {
   const { width: w, height: h } = project;
-  if (project.product === "badge" || project.shape === "circle") {
+  if (project.product === "badge") return badgeShape(project);
+  if (project.shape === "circle") {
     const shape = new THREE.Shape();
-    shape.absellipse(
-      0,
-      0,
-      w / 2,
-      (project.product === "badge" ? w : h) / 2,
-      0,
-      Math.PI * 2,
-      false,
-      0,
-    );
+    shape.absellipse(0, 0, w / 2, h / 2, 0, Math.PI * 2, false, 0);
     return shape;
   }
   if (project.shape === "custom") {
@@ -196,129 +190,16 @@ export function surfaceGeometry(
   project: Project,
   back = false,
 ): THREE.BufferGeometry {
+  if (project.product === "badge") return badgeFrontGeometry(project);
   const w = project.width,
-    h = project.product === "badge" ? w : project.height;
-  if (project.product !== "badge") {
-    const geometry = new THREE.ShapeGeometry(productShape(project), 36);
-    const positions = geometry.attributes.position;
-    const uv = new Float32Array(positions.count * 2);
-    for (let i = 0; i < positions.count; i++) {
-      uv[i * 2] = ((back ? -1 : 1) * positions.getX(i)) / w + 0.5;
-      uv[i * 2 + 1] = positions.getY(i) / h + 0.5;
-    }
-    geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
-    return geometry;
+    h = project.height;
+  const geometry = new THREE.ShapeGeometry(productShape(project), 36);
+  const positions = geometry.attributes.position;
+  const uv = new Float32Array(positions.count * 2);
+  for (let i = 0; i < positions.count; i++) {
+    uv[i * 2] = ((back ? -1 : 1) * positions.getX(i)) / w + 0.5;
+    uv[i * 2 + 1] = positions.getY(i) / h + 0.5;
   }
-  const rings = project.quality === "eco" ? 20 : 40;
-  const segments = project.quality === "eco" ? 80 : 144;
-  const vertices: number[] = [],
-    uv: number[] = [],
-    indices: number[] = [];
-  for (let ring = 0; ring <= rings; ring++) {
-    const proportion = ring / rings,
-      radius = (proportion * w) / 2;
-    const z =
-      project.thickness * (0.5 - 0.6 * Math.pow(proportion, 6)) +
-      w * 0.012 * (1 - proportion * proportion);
-    for (let segment = 0; segment <= segments; segment++) {
-      const angle = (segment / segments) * Math.PI * 2;
-      const x = Math.cos(angle) * radius,
-        y = Math.sin(angle) * radius;
-      vertices.push(x, y, z);
-      uv.push(x / w + 0.5, y / w + 0.5);
-      if (ring < rings && segment < segments) {
-        const a = ring * (segments + 1) + segment,
-          b = a + segments + 1;
-        indices.push(a, b, a + 1, b, b + 1, a + 1);
-      }
-    }
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(vertices, 3),
-  );
-  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
   return geometry;
-}
-
-function rod(
-  start: THREE.Vector3,
-  end: THREE.Vector3,
-  radius: number,
-  material: THREE.Material,
-) {
-  const delta = end.clone().sub(start);
-  const mesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(radius, radius, delta.length(), 14),
-    material,
-  );
-  mesh.position.copy(start).add(end).multiplyScalar(0.5);
-  mesh.quaternion.setFromUnitVectors(
-    new THREE.Vector3(0, 1, 0),
-    delta.normalize(),
-  );
-  return mesh;
-}
-
-export function badgeBack(project: Project): THREE.Group {
-  const group = new THREE.Group();
-  const r = project.width / 2,
-    t = project.thickness;
-  const metal = new THREE.MeshStandardMaterial({
-    color: "#a2a7a6",
-    metalness: 0.92,
-    roughness: 0.29,
-  });
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(r * 0.985, r * 0.985, t * 0.4, 112),
-    metal,
-  );
-  body.rotation.x = Math.PI / 2;
-  // The printed paper wraps over the shoulder; the metal front cap must remain below that curved edge.
-  body.position.z = -t * 0.32;
-  group.add(body);
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(r * 0.93, Math.max(t * 0.1, 0.22), 12, 112),
-    metal,
-  );
-  rim.position.z = -t * 0.55;
-  group.add(rim);
-  const disc = new THREE.Mesh(
-    new THREE.CircleGeometry(r * 0.865, 100),
-    new THREE.MeshStandardMaterial({
-      color: "#929795",
-      metalness: 0.82,
-      roughness: 0.43,
-    }),
-  );
-  disc.rotation.y = Math.PI;
-  disc.position.z = -t * 0.526;
-  group.add(disc);
-  const pinZ = -t * 0.62 - 1.4;
-  group.add(
-    rod(
-      new THREE.Vector3(-r * 0.57, 0, pinZ),
-      new THREE.Vector3(r * 0.54, 0, pinZ - 0.3),
-      Math.max(0.28, r * 0.011),
-      metal,
-    ),
-  );
-  for (const x of [-r * 0.57, r * 0.54]) {
-    const bracket = new THREE.Mesh(
-      new THREE.BoxGeometry(r * 0.11, r * 0.17, 1.3),
-      metal,
-    );
-    bracket.position.set(x, 0, pinZ + 0.75);
-    group.add(bracket);
-  }
-  group.traverse((object) => {
-    if (object instanceof THREE.Mesh) {
-      object.castShadow = true;
-      object.receiveShadow = true;
-    }
-  });
-  return group;
 }

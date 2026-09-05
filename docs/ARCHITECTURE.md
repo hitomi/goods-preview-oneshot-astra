@@ -23,6 +23,8 @@ Cloudflare Pages 可用于分发首次安装所需的静态文件，不承担项
 
 ## 渲染与性能
 
+吧唧模具形状与带来源的尺寸预设集中于 `domain/badges.ts`，验证和UI共享这份目录。版本1追加oval/heart/star枚举；纸品/亚克力仍只接受原有四种形状。吧唧前盖与背盖共享模板轮廓及截面环带，法线和UV连续，背针为独立硬件；非正方形按真实宽高生成纹理。详见BADGE-SHAPES。
+
 Three.js 只在参数、纹理、窗口、相机变化时绘制；阻尼或用户开启自动旋转期间逐帧工作。页面隐藏时停止。DPR 按质量档位限制；纹理限制 1024/2048；不使用远程环境贴图，本地生成摄影棚环境。
 
 材质与几何按依赖变更重建；光照更改不重新解码图片。所有 geometry/material/texture/render target/object URL 在替换和卸载时释放。几何分段及 SVG 复杂度有上限，提供错误恢复而非白屏。像素合成按块让出执行权；新编辑通过 AbortSignal 取消旧合成，PNG 导出等待最新合成结束。
@@ -30,6 +32,8 @@ Three.js 只在参数、纹理、窗口、相机变化时绘制；阻尼或用�
 图层显示与合成共享物理顺序：白墨底层 → 彩印 → 表面工艺。上下移动仅调整同一印刷面、同一工序中的层序。名称输入采用本地草稿，短暂清空时保留上一个有效名称，避免连带阻断保存和备份。备份导入在提交事务前执行与普通导入相同的刀线几何检查。
 
 直角矩形使用四条精确直边，避免零半径贝塞尔采样导致重复角点与漏三角。相机裁剪范围根据模型Box3八角的视向深度更新，为参考线和后方影子留出余量；渲染和PNG导出复用同一计算。不能用过大的固定near/far或对角包围球在极限缩放时浪费深度精度，也不以增大面间距掩盖重叠。
+
+接影平面也由同一Box3视向深度定位，放到最远点之后并保持在far之内，随相机平移、旋转、导出更新。原本按原点固定偏移0.14×尺寸会在倾斜时穿进实体背面，形成三角遮挡；已去除该固定位置假设。
 
 官方依据：[Three.js MeshPhysicalMaterial](https://threejs.org/docs/pages/MeshPhysicalMaterial.html) 的 clearcoat、roughness、metalness、transmission 等能力及开销；[Vite PWA precache](https://vite-pwa-org.netlify.app/guide/service-worker-precache) 要求将全部离线资源纳入预缓存。
 

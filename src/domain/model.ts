@@ -1,5 +1,6 @@
 export type ProductType = "badge" | "paper" | "acrylic";
-export type ShapeType = "circle" | "rectangle" | "rounded" | "custom";
+export type ShapeType =
+  | "circle" | "oval" | "rectangle" | "rounded" | "heart" | "star" | "custom";
 export type Substrate =
   | "white"
   | "pearlescent"

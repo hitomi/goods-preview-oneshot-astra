@@ -8,6 +8,7 @@ const extent = new THREE.Vector3();
 export function fitCameraClipping(
   camera: THREE.PerspectiveCamera,
   bounds: THREE.Box3,
+  shadow?: THREE.Object3D,
 ): void {
   if (bounds.isEmpty()) return;
   camera.getWorldDirection(viewDirection);
@@ -31,6 +32,13 @@ export function fitCameraClipping(
   // when inspecting a thin product close up. Include guides and the rear shadow plane.
   const near = Math.max(size * 0.0001, nearest - Math.max(size * 0.02, 0.2));
   const far = Math.max(near + size * 0.16, farthest + size * 0.16 + 0.2);
+  if (shadow) {
+    // The receiver must clear the rotated model, not just its nominal sheet thickness.
+    shadow.position
+      .copy(camera.position)
+      .addScaledVector(viewDirection, farthest + size * 0.12);
+    shadow.quaternion.copy(camera.quaternion);
+  }
   if (camera.near === near && camera.far === far) return;
   camera.near = near;
   camera.far = far;

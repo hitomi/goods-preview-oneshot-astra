@@ -44,6 +44,7 @@ import {
   SCENES,
 } from "../domain/catalog";
 import { productionIssues } from "../domain/validation";
+import { BADGE_SHAPES, isBadgeShape } from "../domain/badges";
 import { exportProject } from "../lib/storage";
 import { useAssetUrls, useProject } from "../lib/useProject";
 import { useOffline } from "../lib/useOffline";
@@ -510,7 +511,11 @@ export function Studio({ id }: { id: string }) {
               ))}
             </div>
             <div className="model-caption">
-              <span>{PRODUCTS[project.product].label}</span>
+              <span>
+                {project.product === "badge" && isBadgeShape(project.shape)
+                  ? `${BADGE_SHAPES[project.shape].label}吧唧`
+                  : PRODUCTS[project.product].label}
+              </span>
               <strong>
                 {project.shape === "circle"
                   ? `Ø ${project.width}`
@@ -519,7 +524,7 @@ export function Studio({ id }: { id: string }) {
               </strong>
               <p>
                 {project.product === "badge"
-                  ? "正面可视尺寸参考"
+                  ? "成品外轮廓 · 包边结构"
                   : `板材厚度 ${project.thickness} mm`}
               </p>
             </div>

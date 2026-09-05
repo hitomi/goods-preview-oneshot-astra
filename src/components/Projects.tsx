@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import type { Project, ProductType } from "../domain/model";
 import { PRODUCTS, SUBSTRATES, createProject } from "../domain/catalog";
+import { BADGE_SHAPES, isBadgeShape } from "../domain/badges";
+import { BadgeShapeIcon } from "./BadgeShapeIcon";
 import {
   deleteProject,
   importProject,
@@ -211,8 +213,18 @@ export function Projects() {
                       <div
                         className={`project-cover-product sample-${project.product}`}
                       >
-                        <Icon size={44} strokeWidth={1} />
-                        <span>{PRODUCTS[project.product].label}</span>
+                        {project.product === "badge" &&
+                        isBadgeShape(project.shape) ? (
+                          <BadgeShapeIcon shape={project.shape} size={44} />
+                        ) : (
+                          <Icon size={44} strokeWidth={1} />
+                        )}
+                        <span>
+                          {project.product === "badge" &&
+                          isBadgeShape(project.shape)
+                            ? `${BADGE_SHAPES[project.shape].label}吧唧`
+                            : PRODUCTS[project.product].label}
+                        </span>
                       </div>
                       <span className="cover-size">
                         {project.width}

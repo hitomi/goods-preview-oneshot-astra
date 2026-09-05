@@ -537,13 +537,7 @@ class PreviewRuntime implements PreviewHandle {
       : 1 / 60;
     this.previousTime = time;
     const changed = this.controls.update(delta);
-    this.shadow.position
-      .copy(this.camera.position)
-      .sub(this.controls.target)
-      .normalize()
-      .multiplyScalar(-this.size * 0.14);
-    this.shadow.quaternion.copy(this.camera.quaternion);
-    fitCameraClipping(this.camera, this.modelBounds);
+    fitCameraClipping(this.camera, this.modelBounds, this.shadow);
     try {
       this.renderer.render(this.scene, this.camera);
       this.canvas.dataset.frames = String(++this.frames);
@@ -621,7 +615,7 @@ class PreviewRuntime implements PreviewHandle {
       throw (
         this.buildError ?? new Error("预览还未准备好，请等待画面出现后再导出。")
       );
-    fitCameraClipping(this.camera, this.modelBounds);
+    fitCameraClipping(this.camera, this.modelBounds, this.shadow);
     this.renderer.render(this.scene, this.camera);
     return new Promise((resolve, reject) =>
       this.canvas.toBlob(

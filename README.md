@@ -4,9 +4,9 @@
 
 ## 产品范围
 
-v1 及本轮渲染、图片刀线扩展已通过48项单元测试和22项Pages生产构建端到端测试。详细证据与已知限制记录在 [持续进度](docs/PROGRESS.md)。
+v1 及渲染、图片刀线、多形状吧唧扩展已通过84项单元测试和25项Pages生产构建端到端测试。详细证据与已知限制记录在 [持续进度](docs/PROGRESS.md)。
 
-- 三类样机：带包边与背针的圆形吧唧、纸品，以及透明/磨砂/白色亚克力；按制品选择底材、尺寸、厚度和形状。
+- 三类样机：带弧面、卷边、内凹背盖与安全针的六种形状吧唧（圆形、椭圆、圆角方形与长方形、心形、星形）、纸品，以及透明/磨砂/白色亚克力；按制品选择底材、尺寸、厚度和形状。
 - 一次导入多张 PNG、JPEG、WebP 或安全 SVG，逐张分配给正背面印刷、白墨、光油、磨砂、烫色、纸品压凸/压凹，或只存入素材库。
 - 工艺蒙版支持透明度与灰度解释、反相和阈值；调整图层位置、比例、旋转与显示状态，保留原始图片。
 - 切换场景预设、灯光方向与强度，拖动查看三维效果；下载当前视角的 PNG 效果图。
@@ -95,6 +95,7 @@ GitHub 集成、Wrangler 登录与手动发布步骤见 [部署指南](docs/DEPL
 | [TEST-PLAN](docs/TEST-PLAN.md) | 具体验收路径、失败状态和证据要求 |
 | [DEPLOYMENT](docs/DEPLOYMENT.md) | Cloudflare Pages 配置、发布方式与上线后验收 |
 | [渲染与图片刀线](docs/RENDER-AND-RASTER-CUTLINE.md) | 渲染异常原因、位图轮廓识别范围与验收 |
+| [吧唧结构与多形状](docs/BADGE-SHAPES.md) | 六种模具形状、尺寸来源、卷边与安全针结构、验证证据 |
 | [PROGRESS](docs/PROGRESS.md) | 当前进度、实际验证结果及待办；继续开发先读这里 |
 
 项目仓库：[hitomi/goods-preview-oneshot-astra](https://github.com/hitomi/goods-preview-oneshot-astra)。应用支持本地开发和 HTTPS 静态托管，首次缓存后离线使用。

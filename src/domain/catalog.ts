@@ -8,6 +8,7 @@ import {
   type Side,
   type Substrate,
 } from "./model";
+import { BADGE_SHAPES } from "./badges";
 
 export const PRODUCTS: Record<
   ProductType,
@@ -22,9 +23,9 @@ export const PRODUCTS: Record<
 > = {
   badge: {
     label: "吧唧",
-    description: "带金属背针的圆形徽章",
-    defaultWidth: 58,
-    defaultHeight: 58,
+    description: "多种模具外形、带包边和金属背针的徽章",
+    defaultWidth: BADGE_SHAPES.circle.defaultWidth,
+    defaultHeight: BADGE_SHAPES.circle.defaultHeight,
     defaultThickness: 4,
     substrates: ["white", "pearlescent", "holographic"],
   },

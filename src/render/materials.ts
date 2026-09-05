@@ -210,9 +210,7 @@ export async function composeSurface(
   };
   const maximum =
     project.quality === "eco" ? 512 : project.quality === "high" ? 2048 : 1024;
-  const aspect =
-    project.width /
-    (project.product === "badge" ? project.width : project.height);
+  const aspect = project.width / project.height;
   const width = Math.max(
     32,
     Math.round(aspect >= 1 ? maximum : maximum * aspect),

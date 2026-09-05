@@ -1,0 +1,68 @@
+{
+  "method": "Chromium SwiftShader; production build; two complete cycles of six badge shapes, saved and rendered before sampling; no runtime exceptions",
+  "resources": [
+    {
+      "shape": "circle",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "oval",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "rounded",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "rectangle",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "heart",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "star",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "circle",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "oval",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "rounded",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "rectangle",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "heart",
+      "textures": 5,
+      "geometries": 9
+    },
+    {
+      "shape": "star",
+      "textures": 5,
+      "geometries": 9
+    }
+  ],
+  "framesBefore": "50",
+  "framesAfter": "50",
+  "errors": []
+}

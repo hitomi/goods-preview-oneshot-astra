@@ -7,6 +7,14 @@ import {
 } from "./catalog";
 import type { AssetRecord, Layer, ProductionIssue, Project } from "./model";
 import { safeSvg } from "../lib/images";
+import {
+  BADGE_SHAPES,
+  equalDimensions,
+  isBadgeShape,
+  isBadgeStandardSize,
+} from "./badges";
+
+const FLAT_SHAPES = ["circle", "rectangle", "rounded", "custom"] as const;
 
 function fail(field: string): never {
   throw new Error(`项目数据无效：${field}。请使用本应用导出的完整备份。`);
@@ -99,7 +107,12 @@ export function validateProject(input: unknown): Project {
   number(p.width, "宽度（5–500 mm）", 5, 500);
   number(p.height, "高度（5–500 mm）", 5, 500);
   number(p.thickness, "厚度（0.05–20 mm）", 0.05, 20);
-  oneOf(p.shape, ["circle", "rectangle", "rounded", "custom"], "形状");
+  if (p.product === "badge") {
+    if (!isBadgeShape(p.shape))
+      fail("吧唧需要使用已有模具形状，暂不支持自定义刀线");
+  } else {
+    oneOf(p.shape, FLAT_SHAPES, "当前制品形状");
+  }
   oneOf(p.substrate, Object.keys(SUBSTRATES), "底材");
   if (
     !PRODUCTS[p.product as Project["product"]].substrates.includes(
@@ -107,10 +120,15 @@ export function validateProject(input: unknown): Project {
     )
   )
     fail("底材不适用于此制品");
-  if (p.product === "badge" && p.shape !== "circle")
-    fail("当前吧唧样机需要圆形轮廓");
   if (p.shape === "circle" && p.width !== p.height)
     fail("圆形制品宽高需要一致");
+  if (
+    p.product === "badge" &&
+    isBadgeShape(p.shape) &&
+    equalDimensions(p.shape) &&
+    p.width !== p.height
+  )
+    fail(`${BADGE_SHAPES[p.shape].label}吧唧宽高需要一致`);
   oneOf(p.lamination, ["none", "matte", "gloss"], "覆膜");
   oneOf(p.quality, ["eco", "standard", "high"], "预览质量");
   if (p.cutline !== undefined) {
@@ -214,14 +232,39 @@ export function productionIssues(
     });
   if (
     project.product === "badge" &&
-    (project.shape !== "circle" || project.width !== project.height)
+    (!isBadgeShape(project.shape) ||
+      (equalDimensions(project.shape) && project.width !== project.height))
   )
     push({
       id: "badge-shape",
       severity: "error",
-      title: "当前吧唧样机需要圆形轮廓",
+      title: "吧唧形状与尺寸不匹配",
       detail:
-        "请使用相同的宽高和圆形刀线。特殊模具需另外向厂家确认。依据：本应用圆形背针结构。",
+        "请选择已有吧唧模具形状；圆形、圆角方形和星形的宽高需要一致。自定义刀线不能直接用于包边吧唧。依据：本应用支持的徽章结构。",
+    });
+  if (
+    project.product !== "badge" &&
+    (!(FLAT_SHAPES as readonly string[]).includes(project.shape) ||
+      (project.shape === "circle" && project.width !== project.height))
+  )
+    push({
+      id: "product-shape",
+      severity: "error",
+      title: "形状不适用于当前制品",
+      detail:
+        "请选择当前制品支持的形状；圆形需要相同宽高。图案与原刀线会保留。依据：本应用的制品形状范围。",
+    });
+  if (
+    project.product === "badge" &&
+    isBadgeShape(project.shape) &&
+    !isBadgeStandardSize(project.shape, project.width, project.height)
+  )
+    push({
+      id: "badge-size",
+      severity: "warning",
+      title: "此尺寸需要确认吧唧模具",
+      detail:
+        "当前宽高不在应用收录的厂家规格示例中，可以继续预览。请向厂家确认这一形状和尺寸的模具、包边及背针。依据：UCANBADGE 与缶バッジの達人的公开规格；收录尺寸并非通用标准。",
     });
   if (project.product === "badge")
     push({
@@ -229,7 +272,7 @@ export function productionIssues(
       severity: "warning",
       title: "为吧唧包边预留图案",
       detail:
-        "当前尺寸表示正面外径；实际裁纸还需包边。请使用所选工厂对应尺寸的模板，不要直接把预览边缘作为裁切线。依据：徽章包边结构，参见制作说明。",
+        "当前宽高表示成品外轮廓；弧面正面的安全区域更小，实际裁纸还需包边。请使用所选工厂对应模具的模板，不要直接把预览边缘作为裁切线。依据：徽章包边结构，参见制作说明。",
     });
   if (project.shape === "custom")
     push({

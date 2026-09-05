@@ -13,6 +13,13 @@ import type {
   ShapeType,
 } from "../domain/model";
 import { PRODUCTS, SUBSTRATES } from "../domain/catalog";
+import {
+  BADGE_SHAPES,
+  equalDimensions,
+  isBadgeShape,
+  type BadgeShape,
+} from "../domain/badges";
+import { BadgeShapeIcon } from "./BadgeShapeIcon";
 import { NumberField, downloadBlob } from "./ui";
 
 const icons = { badge: Circle, paper: File, acrylic: Layers2 };
@@ -26,6 +33,14 @@ export function ProductPanel({
   update: (fn: (p: Project) => void) => void;
   onImport: () => void;
 }) {
+  const badgeShape =
+    project.product === "badge" && isBadgeShape(project.shape)
+      ? BADGE_SHAPES[project.shape]
+      : undefined;
+  const linkedDimensions =
+    project.shape === "circle" ||
+    (project.product === "badge" && equalDimensions(project.shape));
+
   function changeProduct(type: ProductType) {
     if (type === project.product) return;
     const product = PRODUCTS[type];
@@ -61,6 +76,31 @@ export function ProductPanel({
           );
         })}
       </div>
+      {badgeShape && (
+        <fieldset className="badge-shapes">
+          <legend>吧唧形状</legend>
+          <div className="badge-shape-picker">
+            {(Object.keys(BADGE_SHAPES) as BadgeShape[]).map((shape) => (
+              <button
+                key={shape}
+                className={project.shape === shape ? "selected" : ""}
+                aria-pressed={project.shape === shape}
+                onClick={() => {
+                  if (project.shape === shape) return;
+                  update((p) => {
+                    p.shape = shape;
+                    p.width = BADGE_SHAPES[shape].defaultWidth;
+                    p.height = BADGE_SHAPES[shape].defaultHeight;
+                  });
+                }}
+              >
+                <BadgeShapeIcon shape={shape} />
+                <span>{BADGE_SHAPES[shape].label}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <div className="product-dimensions">
         <NumberField
           label={project.shape === "circle" ? "直径" : "宽度"}
@@ -70,11 +110,11 @@ export function ProductPanel({
           onChange={(n) =>
             update((p) => {
               p.width = n;
-              if (p.shape === "circle") p.height = n;
+              if (linkedDimensions) p.height = n;
             })
           }
         />
-        {project.shape !== "circle" && (
+        {!linkedDimensions && (
           <NumberField
             label="高度"
             value={project.height}
@@ -88,22 +128,37 @@ export function ProductPanel({
           />
         )}
       </div>
-      {project.product === "badge" ? (
-        <div className="size-presets" aria-label="吧唧常用尺寸">
-          {[32, 44, 58, 75].map((size) => (
-            <button
-              className={project.width === size ? "selected" : ""}
-              key={size}
-              onClick={() =>
-                update((p) => {
-                  p.width = p.height = size;
-                })
-              }
-            >
-              {size} mm
-            </button>
-          ))}
-        </div>
+      {badgeShape ? (
+        <>
+          <div
+            className={`size-presets ${project.shape === "circle" ? "" : "badge-size-presets"}`}
+            role="group"
+            aria-label="吧唧常用尺寸"
+          >
+            {badgeShape.presets.map((size) => {
+              const selected =
+                project.width === size.width && project.height === size.height;
+              return (
+                <button
+                  className={selected ? "selected" : ""}
+                  aria-pressed={selected}
+                  key={size.label}
+                  onClick={() =>
+                    update((p) => {
+                      p.width = size.width;
+                      p.height = size.height;
+                    })
+                  }
+                >
+                  {size.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="badge-size-note">
+            尺寸为成品外轮廓。预设参考厂家规格，包边与裁纸请使用对应模具模板。
+          </p>
+        </>
       ) : (
         <div className="form-row">
           <label className="select-field">

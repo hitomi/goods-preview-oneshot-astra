@@ -19,6 +19,49 @@ function backingDepthSteps(camera: THREE.PerspectiveCamera) {
 }
 
 describe("product camera depth precision", () => {
+  it.each([5, 57, 500])(
+    "keeps the shadow receiver behind the entire %s mm model at tilted and panned views",
+    (size) => {
+      const bounds = modelBounds(size);
+      const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 10000);
+      const shadow = new THREE.Object3D();
+      for (const direction of [
+        new THREE.Vector3(0, 0, 1),
+        new THREE.Vector3(0.55, 0.3, -0.7),
+        new THREE.Vector3(0.95, 0.1, -0.05),
+      ]) {
+        const target = new THREE.Vector3(size * 0.25, -size * 0.1, 0);
+        camera.position
+          .copy(direction)
+          .normalize()
+          .multiplyScalar(size * 2.4)
+          .add(target);
+        camera.lookAt(target);
+        fitCameraClipping(camera, bounds, shadow);
+        const view = camera.getWorldDirection(new THREE.Vector3());
+        const shadowDepth = shadow.position
+          .clone()
+          .sub(camera.position)
+          .dot(view);
+        expect(shadowDepth).toBeLessThan(camera.far);
+        for (const x of [bounds.min.x, bounds.max.x])
+          for (const y of [bounds.min.y, bounds.max.y])
+            for (const z of [bounds.min.z, bounds.max.z]) {
+              const depth = new THREE.Vector3(x, y, z)
+                .sub(camera.position)
+                .dot(view);
+              expect(shadowDepth - depth).toBeGreaterThan(size * 0.1);
+            }
+        expect(shadow.quaternion.angleTo(camera.quaternion)).toBeLessThan(1e-7);
+        // Export uses the same path even if clipping planes did not change.
+        const expected = shadow.position.clone();
+        shadow.position.set(0, 0, 0);
+        fitCameraClipping(camera, bounds, shadow);
+        expect(shadow.position.distanceTo(expected)).toBeLessThan(1e-8);
+      }
+    },
+  );
+
   it.each([5, 58, 200, 500])(
     "keeps the %s mm product and pin visible through front, back, zoom and pan",
     (size) => {
